@@ -107,6 +107,7 @@ public:
 	virtual void onClipboardEvent_Copy();
 	virtual void onClipboardEvent_Paste();
     virtual void onSelectAll();
+    virtual void onMagnifyCursor();
 
 	virtual void onSetComposingText(const std::string& text);
 	virtual void onCommitComposingText();

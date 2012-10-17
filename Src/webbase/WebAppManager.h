@@ -209,7 +209,16 @@ public:
 	 * @param	appId			App ID of the app that pasted text from the clipboard.
 	 */
 	void pastedFromClipboard(const std::string& appId);
-	
+
+    /**
+     * Adds a banner to indicate that the cursor is in magnify mode
+     * 
+     * @todo Realistically this function is to demonstrate the "CTL+M" keys or triple tap without having to be looking at the logs
+     * 
+     * @param   appId App ID of the app that copied text to the clipboard.
+     */
+    void showMagnifyCursor(const std::string& appId);
+    
 	/**
 	 * Close a page after processing events
 	 * 

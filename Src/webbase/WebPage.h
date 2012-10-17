@@ -539,6 +539,9 @@ private:
 
 	virtual void copiedToClipboard();
 	virtual void pastedFromClipboard();
+	
+	// Phoenix trap triple tap
+	virtual void showMagnifyCursor();
 
 	virtual bool smartKeySearch(int requestId, const char* query);
 	virtual bool smartKeyLearn(const char* word);

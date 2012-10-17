@@ -30,6 +30,7 @@
 #include "Logging.h"
 
 bool SingleClickGestureRecognizer::g_logSingleClick = false;
+static int g_clickCount = 0;
 
 QGesture* SingleClickGestureRecognizer::create (QObject* target)
 {
@@ -60,14 +61,17 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
 		result |= QGestureRecognizer::ConsumeEventHint;
 		singleClickGesture->m_triggerSingleClickOnRelease = true;
 	    }
-	    // if finger down at the same location for longer than the timer, 
-	    // the single tap has to be triggered after the release
+        // if finger down at the same location for longer than the timer, 
+        // the single tap has to be triggered after the release
+        // Phoenix - detect triple click using counter
+        g_clickCount++;
 	}
 	return result;
     }
 
     switch (event->type()) {
 	case QEvent::TouchBegin:
+	   g_clickCount++;
 	case QEvent::TouchUpdate:
 	case QEvent::TouchEnd:
 	    {
@@ -77,9 +81,10 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
 		    QTouchEvent* touchEvent = static_cast<const QTouchEvent *>(event);
 		    // this starts the gesture, so dont check existing state
 		    if (touchEvent->touchPoints().size() > 1) {
-			singleClickGesture->m_triggerSingleClickOnRelease = false;
-			singleClickGesture->stopSingleClickTimer();
-			result = QGestureRecognizer::CancelGesture;
+    			singleClickGesture->m_triggerSingleClickOnRelease = false;
+    			singleClickGesture->stopSingleClickTimer();
+    			result = QGestureRecognizer::CancelGesture;
+    			g_clickCount = 0;
 		    }
 		}
 		break;
@@ -103,15 +108,16 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
 	    if (singleClickGesture->state() == Qt::GestureStarted
 		    || singleClickGesture->state() == Qt::GestureUpdated)
 	    {
-		QMouseEvent* mouseEvent = static_cast<const QMouseEvent *>(event);
-		int moveDistance = (int) qAbs(QLineF (mouseEvent->posF(), singleClickGesture->m_penDownPos).length());
-		if (moveDistance > s_tapRadius)
-		{
-		    // move is outside tap radius or multiple fingers are down, so this is not a tap
-		    singleClickGesture->stopSingleClickTimer();
-		    singleClickGesture->m_triggerSingleClickOnRelease = false;
-		    result = QGestureRecognizer::CancelGesture;
-		}
+    		QMouseEvent* mouseEvent = static_cast<const QMouseEvent *>(event);
+    		int moveDistance = (int) qAbs(QLineF (mouseEvent->posF(), singleClickGesture->m_penDownPos).length());
+    		if (moveDistance > s_tapRadius)
+    		{
+    		    // move is outside tap radius or multiple fingers are down, so this is not a tap
+    		    singleClickGesture->stopSingleClickTimer();
+    		    singleClickGesture->m_triggerSingleClickOnRelease = false;
+    		    result = QGestureRecognizer::CancelGesture;
+    		    g_clickCount = 0;
+    		}
 	    }
 	    break;
 
@@ -120,14 +126,14 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
 		    || singleClickGesture->state() == Qt::GestureUpdated) {
 		    singleClickGesture->m_mouseDown = false;
 		    if (singleClickGesture->m_triggerSingleClickOnRelease)  {
-			result = QGestureRecognizer::FinishGesture;
-			singleClickGesture->m_triggerSingleClickOnRelease = false;
+    			result = QGestureRecognizer::FinishGesture;
+    			singleClickGesture->m_triggerSingleClickOnRelease = false;
 		    }
 	    }
 
-            if(G_UNLIKELY(g_logSingleClick)){
-                g_message("SYSMGR PERF: Single Click Occurred time:%d", Time::curTimeMs());
-            }
+        if(G_UNLIKELY(g_logSingleClick)){
+            g_message("SYSMGR PERF: Single Click Occurred time:%d", Time::curTimeMs());
+        }
 
 	    break;
 
@@ -135,14 +141,31 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
 	    if (singleClickGesture->state() == Qt::GestureStarted
 		    || singleClickGesture->state() == Qt::GestureUpdated)
 	    {
-		singleClickGesture->stopSingleClickTimer();
-		singleClickGesture->m_triggerSingleClickOnRelease = false;
-		result = QGestureRecognizer::CancelGesture;
+            singleClickGesture->stopSingleClickTimer();
+            singleClickGesture->m_triggerSingleClickOnRelease = false;
+            result = QGestureRecognizer::CancelGesture;
+            g_debug("Phoenix SingleClickGestureRecognizer double click %d", g_clickCount);
+            g_clickCount = 0;
 	    }
 	    break;
-
-	default:
-	    break;
+    default:
+        // Phoenix - Detect triple tap
+        // A Bit kludgey, but basically trap clicks greater than 2, and check if it's 3
+        // then treat it like a triple click
+        // A better way to do this would be add a MouseButtonTripleClick event to QEvent
+        if (g_clickCount == 3 && (singleClickGesture->state() == Qt::GestureStarted
+            || singleClickGesture->state() == Qt::GestureUpdated))
+        {
+            singleClickGesture->stopSingleClickTimer();
+            singleClickGesture->m_triggerSingleClickOnRelease = false;
+            result = QGestureRecognizer::CancelGesture;
+            g_debug("Phoenix SingleClickGestureRecognizer triple click %d", g_clickCount);
+            g_clickCount = 0;
+        }
+        break;
+    }
+    if (g_clickCount > 3) {
+        g_clickCount = 0;
     }
     return result;
 }

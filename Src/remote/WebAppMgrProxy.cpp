@@ -876,16 +876,7 @@ void WebAppMgrProxy::emitSelectAll( Window *win )
 	}
 	sendAsyncMessage(new View_SelectAll(static_cast<HostWindow*>(win)->routingId()));
 }
-// Phoenix Cut/Copy/Paste keyboard capture event
-void WebAppMgrProxy::emitMagnifyCursor( Window *win )
-{
-    if(!win->isIpcWindow()) {
-        g_critical("%s (%d): Invoked for a non-IPC Window.",
-                   __PRETTY_FUNCTION__, __LINE__);
-        return;
-    } 
-//TODO    sendAsyncMessage(new View_MagnifyCursor(static_cast<HostWindow*>(win)->routingId()));
-}
+
 void WebAppMgrProxy::notifyCompassEnabled(bool enabled)
 {
 	//sendAsyncMessage(new View_Mgr_NotifyCompassEnabled(enabled));

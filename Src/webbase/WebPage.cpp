@@ -1065,6 +1065,14 @@ void WebPage::pastedFromClipboard()
 }
 
 /**
+ * Phoenix - triple tap, show magnified cursor
+ */
+void WebPage::showMagnifyCursor()
+{
+    WebAppManager::instance()->showMagnifyCursor(appId());
+}
+
+/**
  * The context information for our smart key search.
  */
 struct SmartKeySearchContext

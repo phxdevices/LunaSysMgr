@@ -182,9 +182,7 @@ void SystemUiController::init()
 	connect(metaKeyMgr, SIGNAL(signalCut()), this, SLOT(slotCut()));
 	connect(metaKeyMgr, SIGNAL(signalPaste()), this, SLOT(slotPaste()));
 	connect(metaKeyMgr, SIGNAL(signalSelectAll()), this, SLOT(slotSelectAll()));
-    // Phoenix Cut/Copy/Paste keyboard capture event
-    connect(metaKeyMgr, SIGNAL(signalMagnifyCursor()), this, SLOT(slotMagnifyCursor()));
-    
+
 	SystemService* ss = SystemService::instance();
 
 	connect(ss, SIGNAL(signalEnterBrickMode(bool)), this, SLOT(slotEnterBrickMode(bool)));
@@ -1914,12 +1912,7 @@ void SystemUiController::slotSelectAll()
 {
 	WebAppMgrProxy::instance()->emitSelectAll( SystemUiController::instance()->activeWindow() );
 }
-// Phoenix Cut/Copy/Paste keyboard capture event
-void SystemUiController::slotMagnifyCursor()
-{
-    g_debug("SystemUiController::slotMagnifyCursor()");
-    WebAppMgrProxy::instance()->emitMagnifyCursor( SystemUiController::instance()->activeWindow() );
-}
+
 void SystemUiController::hideStatusBarAndNotificationArea()
 {
 	// We expand positive space.

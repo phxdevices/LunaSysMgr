@@ -1995,6 +1995,33 @@ void WebAppManager::pastedFromClipboard(const std::string& appId)
 
 }
 
+/**
+ * NOTE: Doesn't seem to be working. Supposed to add a banner to indicate that the cursor is in magnify mode
+ * 
+ * @todo Realistically this function is to demonstrate the "CTL+M" keys or triple tap without having to be looking at the logs
+ * 
+ * @param   appId App ID of the app that copied text to the clipboard.
+ */
+void WebAppManager::showMagnifyCursor(const std::string& appId)
+{
+    g_debug("WebAppManager::showMagnifyCursor");
+            
+    if (!s_lastCopyClipboardMessageId.empty()) {
+        BannerMessageEvent* e = BannerMessageEventFactory::createRemoveMessageEvent(appId,
+                                                                             s_lastCopyClipboardMessageId);
+        sendAsyncMessage(new ViewHost_BannerMessageEvent(BannerMessageEventWrapper(e)));
+    }
+
+    std::string nullString;
+    BannerMessageEvent* e = BannerMessageEventFactory::createAddMessageEvent(appId,
+                                                                             LOCALIZED("Magnify Cursor"),
+                                                                             "{ }", nullString, nullString,
+                                                                             nullString, -1, false);
+    sendAsyncMessage(new ViewHost_BannerMessageEvent(BannerMessageEventWrapper(e)));
+
+    s_lastCopyClipboardMessageId = e->msgId;
+}
+
 void WebAppManager::closePageSoon(WebPage* page)
 {
 	if (!page)

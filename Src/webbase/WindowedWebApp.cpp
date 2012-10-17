@@ -309,6 +309,14 @@ void WindowedWebApp::onSelectAll()
 	page()->selectAll();
 }
 
+/**
+ * Phoenix - intercept triple tap
+ */
+void WindowedWebApp::onMagnifyCursor()
+{
+    g_debug("DEBUG WindowedWebApp::onMagnifyCursor()");
+}
+
 void WindowedWebApp::onSetComposingText(const std::string& text)
 {
 	page()->setComposingText(text.c_str());

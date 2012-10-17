@@ -112,6 +112,7 @@ public:
 	void emitCut(Window *win);
 	void emitPaste(Window *win);
 	void emitSelectAll(Window *win);
+	void emitMagnifyCursor(Window *win);// Phoenix Cut/Copy/Paste keyboard capture event
 	
 	void suspendWebKitProcess();
 	void resumeWebKitProcess();

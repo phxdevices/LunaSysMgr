@@ -17,8 +17,8 @@
 * LICENSE@@@ */
 
 
-
-
+#include <stdio.h>
+#include <stdlib.h>
 #include "Common.h"
 
 #include "MetaKeyManager.h"
@@ -60,6 +60,16 @@ bool MetaKeyManager::handleEvent(QEvent* event)
             // This is a workaround until we move to QtWebKit
             if (keyEvent->type() == QEvent::KeyPress) {
                 Q_EMIT signalSelectAll();
+            }
+            return true;
+        } else if (keyEvent->key() == Qt::Key_M) {
+            // Phoenix Cut/Copy/Paste keyboard capture event
+            // Intercepting the Mod + M key
+            // NOTE: SelectAll should be detected and triggered by webkit,
+            // This is a workaround until we move to QtWebKit
+            if (keyEvent->type() == QEvent::KeyPress) {
+                printf("DEBUG Key M");
+                Q_EMIT signalMagnifyCursor();
             }
             return true;
         }

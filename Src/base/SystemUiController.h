@@ -404,6 +404,8 @@ private Q_SLOTS:
 	void slotCut();
 	void slotPaste();
 	void slotSelectAll();
+	// Phoenix Cut/Copy/Paste keyboard capture event
+    void slotMagnifyCursor();
 
 	void slotAnimFinished();
 

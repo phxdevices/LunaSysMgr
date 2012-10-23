@@ -160,9 +160,9 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
         // A Bit kludgey, but basically trap clicks greater than 2, and check if it's 3
         // then treat it like a triple click
         // A better way to do this would be add a MouseButtonTripleClick event to QEvent
-        uint32_t l_deltaClickTime = tripleClickTimer.elapsed() - s_lastTripleClickTime;
-        qDebug() << "Elapsed b " << l_deltaClickTime << ":" << (l_deltaClickTime < 8000) << ":" << g_clickCount;
-        if (g_clickCount == 3 && (l_deltaClickTime < 8000) && (singleClickGesture->state() == Qt::GestureStarted
+        uint32_t l_deltaClickTime = tripleClickTimer.restart() - s_lastTripleClickTime;
+        qDebug() << "Elapsed " << l_deltaClickTime << ":" << (l_deltaClickTime < 8500) << ":" << g_clickCount;
+        if (g_clickCount == 3 && (l_deltaClickTime < 8500) && (singleClickGesture->state() == Qt::GestureStarted
             || singleClickGesture->state() == Qt::GestureUpdated))
         {
             singleClickGesture->stopSingleClickTimer();
@@ -175,7 +175,7 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
         break;
     }
     if (g_clickCount > 3) {
-        g_clickCount = 0;
+    g_clickCount = 0;
     }
     return result;
 }

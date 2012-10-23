@@ -23,6 +23,7 @@
 
 #include <QTouchEvent>
 #include <QLineF>
+#include <QtCore>
 #include <glib.h>
 #include "Time.h"
 #include "SingleClickGesture.h"
@@ -42,7 +43,8 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
     QGestureRecognizer::Result result = QGestureRecognizer::Ignore;
 
     SingleClickGesture* singleClickGesture = static_cast<SingleClickGesture*>(gesture);
-
+    QElapsedTimer tripleClickTimer;
+    
     static int s_tapRadius = -1;
     if (G_UNLIKELY(s_tapRadius < 0))
 		s_tapRadius = Settings::LunaSettings()->tapRadius;
@@ -52,6 +54,7 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
 
     if (watched == singleClickGesture && event->type() == QEvent::Timer) {
 	singleClickGesture->stopSingleClickTimer();
+
 	if (singleClickGesture->state() != Qt::GestureCanceled
 		&& singleClickGesture->state() != Qt::GestureFinished)
 	{
@@ -98,6 +101,7 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
     		singleClickGesture->m_modifiers = mouseEvent->modifiers();
     		result = QGestureRecognizer::TriggerGesture;
     		singleClickGesture->startSingleClickTimer();
+    		s_lastTripleClickTime = tripleClickTimer.restart();
     		break;
 	    }
 
@@ -144,7 +148,8 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
             singleClickGesture->m_triggerSingleClickOnRelease = false;
             result = QGestureRecognizer::CancelGesture;
             g_debug("Phoenix SingleClickGestureRecognizer double click %d", g_clickCount);
-            // TODO Phoenix - Howto differentiate double from triple tap?
+
+            // TODO Phoenix - How to differentiate double from triple tap?
 	    }
 	    break;
     default:
@@ -155,13 +160,16 @@ QGestureRecognizer::Result SingleClickGestureRecognizer::recognize (QGesture* ge
         // A Bit kludgey, but basically trap clicks greater than 2, and check if it's 3
         // then treat it like a triple click
         // A better way to do this would be add a MouseButtonTripleClick event to QEvent
-        if (g_clickCount == 3 && (singleClickGesture->state() == Qt::GestureStarted
+        uint32_t l_deltaClickTime = tripleClickTimer.elapsed() - s_lastTripleClickTime;
+        qDebug() << "Elapsed b " << l_deltaClickTime << ":" << (l_deltaClickTime < 8000) << ":" << g_clickCount;
+        if (g_clickCount == 3 && (l_deltaClickTime < 8000) && (singleClickGesture->state() == Qt::GestureStarted
             || singleClickGesture->state() == Qt::GestureUpdated))
         {
             singleClickGesture->stopSingleClickTimer();
             singleClickGesture->m_triggerSingleClickOnRelease = false;
             result = QGestureRecognizer::CancelGesture;
             g_debug("Phoenix SingleClickGestureRecognizer triple click %d", g_clickCount);
+
             g_clickCount = 0;
         }
         break;

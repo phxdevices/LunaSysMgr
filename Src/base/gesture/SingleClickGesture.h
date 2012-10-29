@@ -37,38 +37,51 @@ class SingleClickGesture : public QGesture
 public:
 	SingleClickGesture(QObject* parent = 0)
 	    : QGesture(parent, (Qt::GestureType) SysMgrGestureSingleClick)
-	    , m_timerId(0), m_triggerSingleClickOnRelease (false), m_mouseDown (false)
-	    , m_modifiers (0)
-            {
-	        m_timerValue = Settings::LunaSettings()->tapDoubleClickDuration;
-		if (m_timerValue <= 0)
-		    m_timerValue = 300;
-	    }
-
-	virtual ~SingleClickGesture() {
-	    stopSingleClickTimer();
-	}
+	    , m_timerId(0), m_triggerSingleClickOnRelease (false), m_triggerTripleClickOnRelease (false), m_mouseDown (false)
+	    , m_modifiers (0) {
+            m_timerValue = Settings::LunaSettings()->tapDoubleClickDuration;
+    		if (m_timerValue <= 0) {
+    		  m_timerValue = 300;
+    		}
+    	    m_tripleTimerValue = (int) (1.5 * m_timerValue);
+    	}
+    
+    	virtual ~SingleClickGesture() {
+    	    stopSingleClickTimer();
+    	}
 
 	Qt::KeyboardModifiers modifiers() const { return m_modifiers; }
 
 private:
-	int m_timerId;
-	int m_timerValue;
+    int m_timerId;
+    int m_timerValue;
+    int m_tripleTimerId;
+    int m_tripleTimerValue;
 	QPointF m_penDownPos;
 	bool m_mouseDown;
 	bool m_triggerSingleClickOnRelease;
+	bool m_triggerTripleClickOnRelease;
 	Qt::KeyboardModifiers m_modifiers;
 
-	void startSingleClickTimer() {
-	    m_timerId = startTimer(Settings::LunaSettings()->tapDoubleClickDuration);
-	}
+    void startSingleClickTimer() {
+        m_timerId = startTimer(Settings::LunaSettings()->tapDoubleClickDuration);
+    }
+    void startTripleClickTimer() {
+        m_tripleTimerId = startTimer(Settings::LunaSettings()->tapDoubleClickDuration);
+    }
 
-	void stopSingleClickTimer() {
-	    if (m_timerId) {
-		killTimer(m_timerId);
-		m_timerId = 0;
-	    }
-	}
+    void stopSingleClickTimer() {
+        if (m_timerId) {
+          killTimer(m_timerId);
+            m_timerId = 0;
+        }
+    }
+    void stopTripleClickTimer() {
+        if (m_tripleTimerId) {
+          killTimer(m_tripleTimerId);
+            m_tripleTimerId = 0;
+        }
+    }
 private:
 	friend class SingleClickGestureRecognizer;
 
